@@ -1,0 +1,28 @@
+{
+  "name": "pokuta-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "snowpack dev",
+    "build": "snowpack build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bartektelec/pokuta-generator.git"
+  },
+  "keywords": [],
+  "author": "bartektelec",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bartektelec/pokuta-generator/issues"
+  },
+  "homepage": "https://github.com/bartektelec/pokuta-generator#readme",
+  "dependencies": {
+    "typescript": "^4.5.5"
+  },
+  "devDependencies": {
+    "snowpack": "^3.8.8"
+  }
+}
