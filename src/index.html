@@ -9,41 +9,8 @@
 </head>
 
 <body>
-    <h1>Pokuta generator</h1>
-    <main>
-        <form id="form" target="#">
-            <fieldset>
-                <label for="form-date-since">
-                    Ostatni raz u spowiedzi bylem
-                </label>
-                <input type="date" id="form-date-since">
-                <label for="form-date-since">
-                    Wypełniłem zadaną pokutę
-                </label>
-                <input type="checkbox" id="form-is-pokuta">
-            </fieldset>
-            <fieldset id="fieldset-sins">
-                <h2>Grzechy menu</h2>
-            </fieldset>
-            <fieldset>
-                <label for="forgot-sins">
-                    Wiecej grzechow nie pamietam
-                </label>
-                <input data-cost="100" type='checkbox' id="forgot-sins" />
-                <label for="regret-sins">
-                    Za wszystkie grzechy żałuję
-                </label>
-                <input data-cost="-50" type='checkbox' id="regret-sins" />
-            </fieldset>
-            <fieldset id="more-info">
-            </fieldset>
-            <button type='submit'>Ameno dorime</button>
-        </form>
-
-        <div id="result">
-        </div>
-    </main>
+    <div id="root"></div>
 </body>
-<script src="app.js"></script>
+<script src="app.js" type='module'></script>
 
 </html>

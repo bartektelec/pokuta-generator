@@ -1,114 +1,64 @@
-interface ISin {
-  id: number;
-  name: string;
-  cost: number;
-}
+import { state, watch } from './state';
+import { c, t } from './component';
 
-const sins: ISin[] = [
-  {
-    id: 0,
-    name: 'Pycha',
-    cost: 10,
-  },
-  {
-    id: 1,
-    name: 'Chciwość',
-    cost: 30,
-  },
-  {
-    id: 2,
-    name: 'Nieczystość',
-    cost: 50,
-  },
-  {
-    id: 3,
-    cost: 15,
-    name: 'Zazdrość',
-  },
-  {
-    id: 4,
-    cost: 30,
-    name: 'Nieumiarkowanie w jedzeniu i piciu',
-  },
-  {
-    id: 5,
-    cost: 2,
-    name: 'Gniew',
-  },
-  {
-    id: 6,
-    cost: 80,
-    name: 'Lenistwo',
-  },
-];
+import sinsList, { sins } from './sins';
 
-// state
-let selectedSins: number[] = [];
-let weeksSinceLastTime: number = 0;
+const [lastTime, setLastTime] = state<string>('');
+const [pokutaDone, setPokutaDone] = state<boolean>(false);
+const [isRegret, setIsRegret] = state<boolean>(false);
+const [list, setList] = state<number[]>([]);
+const [sum, setSum] = state<number>(0);
 
-const sinsWrapper = document.querySelector('#fieldset-sins')!;
+const calculatePrice = () => {
+  const mappedSins = list.current.map(
+    (x) => sins.find((item) => item.id === x)!
+  );
+  const sumSins = mappedSins.reduce((acc, curr) => acc + curr?.cost, 0);
 
-const updatePrice = () => {
-  let sum = 0;
+  let result = sumSins;
 
-  for (let id of selectedSins) {
-    const current = sins.find((sin) => sin.id === id);
+  if (!pokutaDone.current) result += 50;
+  if (!isRegret.current) result += 20;
 
-    if (!current) continue;
-    sum += current.cost;
-  }
+  const then = Number(new Date(lastTime.current));
+  const today = Date.now();
 
-  document.querySelector(
-    '#result'
-  )!.textContent = `Ostatni raz u spowiedzi bylem ${weeksSinceLastTime} i zaplace ${sum}`;
+  const dateDiff = today - then;
+
+  let WEEKS_SINCE = 1;
+  if (dateDiff > 0)
+    WEEKS_SINCE = Math.floor(Math.abs(dateDiff) / (1000 * 60 * 60 * 24 * 7));
+
+  result += WEEKS_SINCE * 5;
+
+  setSum(result);
 };
 
-const toggleSinChange = (sin: ISin, isChecked: boolean) => {
-  if (!isChecked) {
-    selectedSins = selectedSins.filter((item) => item !== sin.id);
-  } else {
-    selectedSins = [...selectedSins, sin.id];
-  }
+watch([lastTime, pokutaDone, isRegret, list], calculatePrice);
 
-  updatePrice();
-};
+const form = c('form', { target: '#' }, [
+  c('fieldset', {}, [
+    c('label', { for: 'last-time' }, [t('Ostatni raz bylem u spowiedzi')]),
+    c('input', { id: 'last-time', type: 'date' }, []).on('change', (e) =>
+      setLastTime((e.currentTarget as HTMLInputElement).value)
+    ),
+    c('label', { for: 'last-pokuta-done' }, [t('Pokute zadana wykonalem')]),
+    c('input', { id: 'last-pokuta-done', type: 'checkbox' }, [
+      t('Ostatni raz bylem u spowiedzi'),
+    ])
+      .on('change', (e) =>
+        setPokutaDone((e.currentTarget as HTMLInputElement).checked)
+      )
+      .bind(pokutaDone, 'checked'),
+    c('label', { for: 'is-regret' }, [t('Bylo zalowane')]),
+    c('input', { id: 'is-regret', type: 'checkbox' }, []).on('change', (e) =>
+      setIsRegret((e.currentTarget as HTMLInputElement).checked)
+    ),
+  ]),
+  c('fieldset', {}, [sinsList(list, setList)]),
+  c('div', {}, [t('Tyle kosztuje kurwa rozgrzeszenie:  '), t(sum)]),
+]);
 
-const createSinCheckbox = (input: ISin): Node => {
-  const element = document.createElement('div');
-  const labelElement = document.createElement('label');
-  const inputElement = document.createElement('input');
+const app = c('main', {}, [c('h1', {}, [t('Generator pokuty')]), form]);
 
-  const uid = `sin-${input.id}`;
-
-  labelElement.innerText = input.name;
-  labelElement.setAttribute('for', uid);
-
-  inputElement.type = 'checkbox';
-  inputElement.id = uid;
-  inputElement.addEventListener('change', (e) => {
-    const el = <HTMLInputElement>e.currentTarget;
-    toggleSinChange(input, el.checked);
-  });
-
-  element.append(labelElement, inputElement);
-
-  return element;
-};
-
-document.querySelector('#form-date-since')?.addEventListener('change', (e) => {
-  const el = <HTMLInputElement>e.target;
-
-  const today = new Date();
-
-  const result = Number(new Date(el.value)) - Number(today);
-
-  const MS_IN_A_WEEK = 1000 * 60 * 60 * 24 * 7;
-
-  if (result >= 0) weeksSinceLastTime = 1;
-
-  weeksSinceLastTime = Math.floor(Math.abs(result) / MS_IN_A_WEEK);
-
-  updatePrice();
-});
-
-sinsWrapper.append(...sins.map((sin) => createSinCheckbox(sin)));
+document.querySelector('#root')?.append(app.render());
